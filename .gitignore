@@ -1,0 +1,39 @@
+############################
+# General
+############################
+.DS_Store
+Thumbs.db
+*.log
+
+############################
+# Environment Variables
+############################
+.env
+.env.*
+application-local.properties
+
+############################
+# Backend - Spring Boot / Maven
+############################
+backend/target/
+backend/.classpath
+backend/.project
+backend/.settings/
+backend/.idea/
+backend/*.iml
+
+############################
+# Frontend - React / Node
+############################
+frontend/node_modules/
+frontend/build/
+frontend/.env
+frontend/.env.*
+frontend/.idea/
+frontend/.vscode/
+
+############################
+# OS Files
+############################
+*.swp
+*.swo
