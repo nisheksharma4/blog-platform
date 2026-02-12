@@ -2,6 +2,7 @@ package com.nsdev.blog.module.blog.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -90,8 +91,9 @@ public class BlogServiceImpl implements BlogService{
 
 	@Override
 	public BlogResponseDto getBlogBySlug(String slug) {
-		// TODO Auto-generated method stub
-		return null;
+		Blog bySlug = blogRepository.findBySlug(slug)
+				.orElseThrow(() -> new RuntimeException("Blog not found with slug "+slug));
+		return convertToResponseDto(bySlug);
 	}
 
 	@Override
