@@ -3,8 +3,13 @@ package com.nsdev.blog.module.blog.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.nsdev.blog.module.blog.dto.BlogRequestDto;
 import com.nsdev.blog.module.blog.dto.BlogResponseDto;
@@ -73,13 +78,36 @@ public class BlogServiceImpl implements BlogService{
 
 	@Override
 	public BlogResponseDto updateBlog(String id, BlogRequestDto requestDto) {
-		// TODO Auto-generated method stub
-		return null;
+		if(!blogRepository.existsById(id)) {
+			throw new RuntimeException("Blog does not exists.");
+		}
+		Blog existingBlog = blogRepository.findById(id).orElseThrow();
+		
+		//update fields
+		existingBlog.setTitle(requestDto.getTitle());
+		existingBlog.setContent(requestDto.getContent());
+		existingBlog.setExcerpt(requestDto.getExcerpt());
+		existingBlog.setFeaturedImageUrl(requestDto.getFeaturedImageUrl());
+		existingBlog.setTags(requestDto.getTags());
+		existingBlog.setUpdatedAt(LocalDateTime.now());
+		
+		if (requestDto.getSlug() != null && !requestDto.getSlug().trim().isEmpty()) {
+	        existingBlog.setSlug(requestDto.getSlug().toLowerCase());
+	    }
+		
+		Blog save = blogRepository.save(existingBlog);
+		
+		return convertToResponseDto(save);
 	}
 
 	@Override
 	public void deleteBlog(String id) {
-		// TODO Auto-generated method stub
+		
+		if(!blogRepository.existsById(id)) {
+			throw new RuntimeException("Blog does not exist By :"+id);
+		}
+		
+		blogRepository.deleteById(id);
 		
 	}
 
@@ -88,18 +116,26 @@ public class BlogServiceImpl implements BlogService{
 		// TODO Auto-generated method stub
 		return null;
 	}
-
+	
 	@Override
 	public BlogResponseDto getBlogBySlug(String slug) {
-		Blog bySlug = blogRepository.findBySlug(slug)
-				.orElseThrow(() -> new RuntimeException("Blog not found with slug "+slug));
-		return convertToResponseDto(bySlug);
+	    Blog bySlug = blogRepository.findBySlug(slug)
+	            .orElseThrow(() -> new ResponseStatusException(
+	                    HttpStatus.NOT_FOUND, "Blog not found with slug " + slug));
+	    return convertToResponseDto(bySlug);
 	}
 
 	@Override
 	public List<BlogResponseDto> getAllPublishedBlogs(int page, int size) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		Page<Blog> blogPage = blogRepository.findByStatus(Blog.Status.PUBLISHED, PageRequest.of(page, size));
+		
+		List<Blog> content = blogPage.getContent();
+		
+		 return content.stream()
+        .map(this::convertToResponseDto)
+        .collect(Collectors.toList());
+		
 	}
 
 }
