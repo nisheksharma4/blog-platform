@@ -20,6 +20,7 @@ import com.nsdev.blog.module.blog.dto.BlogResponseDto;
 import com.nsdev.blog.module.blog.service.BlogService;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -50,10 +51,18 @@ public class AdminBlogController {
 	
 	@GetMapping
 	public ResponseEntity<ResponseStructure<List<BlogResponseDto>>> getAllPublishedBlogs(
-	        @RequestParam(defaultValue = "0") int page,
-	        @RequestParam(defaultValue = "10") int size) {
+	        @RequestParam(defaultValue = "0") @Min(0) int page,
+	        @RequestParam(defaultValue = "10") @Min(1) int size) {
+		
 	    List<BlogResponseDto> blogs = blogService.getAllPublishedBlogs(page, size);
 	    return ResponseStructure.create(HttpStatus.OK, "Fetched All the Published Blogs.", blogs);
+	}
+	
+	@GetMapping("/{id}")
+	public ResponseEntity<ResponseStructure<BlogResponseDto>> getBlogById(@PathVariable String id) {
+		BlogResponseDto blogById = blogService.getBlogById(id);
+		
+		return ResponseStructure.create(HttpStatus.OK, "Fetched Blog By "+id, blogById);
 	}
 	
 	@PutMapping("/{id}")
