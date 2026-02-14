@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.nsdev.blog.common.utils.ResponseStructure;
 import com.nsdev.blog.module.blog.dto.BlogRequestDto;
 import com.nsdev.blog.module.blog.dto.BlogResponseDto;
 import com.nsdev.blog.module.blog.service.BlogService;
@@ -29,35 +30,46 @@ public class AdminBlogController {
 	private final BlogService blogService;
 	
 	@PostMapping
-	public ResponseEntity<BlogResponseDto> createBlog(@Valid @RequestBody BlogRequestDto blogRequestDto) {
+	public ResponseEntity<ResponseStructure<BlogResponseDto>> createBlog(@Valid @RequestBody BlogRequestDto blogRequestDto) {
 		BlogResponseDto responseDto = blogService.createBlog(blogRequestDto);
-		return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
+		
+		 return ResponseStructure.create(
+		            HttpStatus.CREATED,
+		            "Blog Created Successfully",
+		            responseDto
+		    );
 	}
 	
+	
 	@GetMapping("/slug/{slug}")
-	public ResponseEntity<BlogResponseDto> getBlogBySlug(@PathVariable String slug) {
+	public ResponseEntity<ResponseStructure<BlogResponseDto>> getBlogBySlug(@PathVariable String slug) {
 		BlogResponseDto blogBySlug = blogService.getBlogBySlug(slug);
-		return ResponseEntity.ok(blogBySlug);
+		
+		return ResponseStructure.create(HttpStatus.OK, "Blogs with Slugs.", blogBySlug);
 	}
 	
 	@GetMapping
-	public ResponseEntity<List<BlogResponseDto>> getAllPublishedBlogs(
+	public ResponseEntity<ResponseStructure<List<BlogResponseDto>>> getAllPublishedBlogs(
 	        @RequestParam(defaultValue = "0") int page,
 	        @RequestParam(defaultValue = "10") int size) {
 	    List<BlogResponseDto> blogs = blogService.getAllPublishedBlogs(page, size);
-	    return ResponseEntity.ok(blogs);
+	    return ResponseStructure.create(HttpStatus.OK, "Fetched All the Published Blogs.", blogs);
 	}
 	
 	@PutMapping("/{id}")
-	public ResponseEntity<BlogResponseDto> updateBlog(@PathVariable String id, @Valid @RequestBody BlogRequestDto dto){
+	public ResponseEntity<ResponseStructure<BlogResponseDto>> updateBlog(@PathVariable String id, @Valid @RequestBody BlogRequestDto dto){
 		BlogResponseDto updateBlog = blogService.updateBlog(id, dto);
-		return ResponseEntity.ok(updateBlog);
+		return ResponseStructure.create(HttpStatus.OK, "Blog with "+id+" updated Successfully.", updateBlog);
 	}
 	
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> deleteBlog(@PathVariable String id) {
+	public ResponseEntity<ResponseStructure<Void>> deleteBlog(@PathVariable String id) {
 		blogService.deleteBlog(id);
-		return ResponseEntity.noContent().build();
+		return ResponseStructure.create(
+	            HttpStatus.OK,
+	            "Blog Deleted Successfully",
+	            null
+	    );
 	}
 	
 	
