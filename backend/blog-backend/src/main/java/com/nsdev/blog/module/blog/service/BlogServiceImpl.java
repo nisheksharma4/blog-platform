@@ -2,16 +2,14 @@ package com.nsdev.blog.module.blog.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.nsdev.blog.common.exception.BlogNotFoundException;
+import com.nsdev.blog.common.utils.SlugGenerator;
 import com.nsdev.blog.module.blog.dto.BlogRequestDto;
 import com.nsdev.blog.module.blog.dto.BlogResponseDto;
 import com.nsdev.blog.module.blog.model.Blog;
@@ -26,6 +24,8 @@ import lombok.extern.slf4j.Slf4j;
 public class BlogServiceImpl implements BlogService{
 	
 	final BlogRepository blogRepository;
+	private SlugGenerator slugGenerator;
+	
 
 	@Override
 	public BlogResponseDto createBlog(BlogRequestDto requestDto) {
@@ -48,7 +48,7 @@ public class BlogServiceImpl implements BlogService{
 	    if (requestDto.getSlug() != null && !requestDto.getSlug().trim().isEmpty()) {
 	        blog.setSlug(requestDto.getSlug().toLowerCase());
 	    } else {
-	        blog.setSlug(generateSlug(requestDto.getTitle()));
+	        blog.setSlug(slugGenerator.generateSlug(requestDto.getTitle()));
 	    }
 	    
 	 // 3. Save to MongoDB
@@ -58,13 +58,6 @@ public class BlogServiceImpl implements BlogService{
 	    return convertToResponseDto(savedBlog);
 	}
 	
-	// Helper method to Generate slug from title
-	private String generateSlug(String title) {
-	    return title.toLowerCase()
-	        .replaceAll("[^a-z0-9]+", "-")  // Replace non-alphanumeric with hyphens
-	        .replaceAll("-+", "-")           // Replace multiple hyphens with single
-	        .replaceAll("^-+|-+$", "");      // Remove leading/trailing hyphens
-	}
 	
 	// Helper method to Convert Blog entity to BlogResponseDto
 	private BlogResponseDto convertToResponseDto(Blog blog) {
