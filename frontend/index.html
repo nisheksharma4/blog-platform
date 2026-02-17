@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nishek's Blog</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <div class="container">
+                <div class="nav-brand">
+                    <h1><a href="index.html">Nishek's Blog</a></h1>
+                </div>
+                <div class="nav-links">
+                    <a href="index.html">Home</a>
+                    <a href="admin.html">Admin</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <h2>Latest Posts</h2>
+        <div id="blogs-container" class="blogs-grid">
+            <!-- Blogs will be loaded here by JavaScript -->
+            <p>Loading blogs...</p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Nishek's Blog. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Load scripts -->
+    <script src="js/api.js"></script>
+    <script>
+        // Debug: Check if API is available
+        if (typeof API !== 'undefined') {
+            console.log('API is available globally');
+        } else {
+            console.error('API is NOT defined! Check api.js path');
+        }
+    </script>
+    <script src="js/main.js"></script>
+</body>
+</html>
