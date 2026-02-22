@@ -24,7 +24,7 @@ backend/.project
 backend/.settings/
 backend/.idea/
 backend/*.iml
-
+blog-backend/src/main/resources/application.properties
 ############################
 # Frontend - React (Vite)
 ############################
