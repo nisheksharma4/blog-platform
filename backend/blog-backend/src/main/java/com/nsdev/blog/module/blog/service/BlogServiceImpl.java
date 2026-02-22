@@ -9,7 +9,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.nsdev.blog.common.exception.BlogNotFoundException;
-import com.nsdev.blog.common.utils.SlugGenerator;
 import com.nsdev.blog.module.blog.dto.BlogRequestDto;
 import com.nsdev.blog.module.blog.dto.BlogResponseDto;
 import com.nsdev.blog.module.blog.model.Blog;
@@ -24,13 +23,19 @@ import lombok.extern.slf4j.Slf4j;
 public class BlogServiceImpl implements BlogService{
 	
 	final BlogRepository blogRepository;
-	private SlugGenerator slugGenerator;
 	
 
 	@Override
 	public BlogResponseDto createBlog(BlogRequestDto requestDto) {
 		
 		log.info("Creating new blog with title: {}", requestDto.getTitle());
+		
+		String slug = requestDto.getSlug() != null && !requestDto.getSlug().trim().isEmpty()
+		        ? requestDto.getSlug().toLowerCase().replaceAll("[^a-z0-9-]", "").replaceAll("-+", "-").replaceAll("^-+|-+$", "")
+		        : requestDto.getTitle().toLowerCase()
+		            .replaceAll("[^a-z0-9]+", "-")
+		            .replaceAll("-+", "-")
+		            .replaceAll("^-+|-+$", "");
 		//1. Create Blog entity from DTO
 		Blog blog = Blog.builder()
 		.title(requestDto.getTitle())
@@ -38,18 +43,13 @@ public class BlogServiceImpl implements BlogService{
 		.excerpt(requestDto.getExcerpt())
 		.featuredImageUrl(requestDto.getFeaturedImageUrl())
 		.tags(requestDto.getTags())
+		.slug(slug)
 		.status(Blog.Status.PUBLISHED)
 		.createdAt(LocalDateTime.now())
 		.updatedAt(LocalDateTime.now())
 		.publishedAt(LocalDateTime.now())
 		.build();
 		
-		// 2. Generate slug if not provided
-	    if (requestDto.getSlug() != null && !requestDto.getSlug().trim().isEmpty()) {
-	        blog.setSlug(requestDto.getSlug().toLowerCase());
-	    } else {
-	        blog.setSlug(slugGenerator.generateSlug(requestDto.getTitle()));
-	    }
 	    
 	 // 3. Save to MongoDB
 	    Blog savedBlog = blogRepository.save(blog);
@@ -77,10 +77,12 @@ public class BlogServiceImpl implements BlogService{
 	public BlogResponseDto updateBlog(String id, BlogRequestDto requestDto) {
 		log.info("Updating blog with id: {}", id);
 		if(!blogRepository.existsById(id)) {
+			log.error("Blog not found with id: {}", id);
 		    throw new BlogNotFoundException("Blog does not exist with id: " + id);
 		}
 
-		Blog existingBlog = blogRepository.findById(id).orElseThrow();
+		Blog existingBlog = blogRepository.findById(id)
+				.orElseThrow(() -> new BlogNotFoundException("Blog not found with id: " + id));
 		
 		//update fields
 		existingBlog.setTitle(requestDto.getTitle());
@@ -91,7 +93,11 @@ public class BlogServiceImpl implements BlogService{
 		existingBlog.setUpdatedAt(LocalDateTime.now());
 		
 		if (requestDto.getSlug() != null && !requestDto.getSlug().trim().isEmpty()) {
-	        existingBlog.setSlug(requestDto.getSlug().toLowerCase());
+	        String cleanSlug = requestDto.getSlug().toLowerCase()
+	            .replaceAll("[^a-z0-9-]", "")
+	            .replaceAll("-+", "-")
+	            .replaceAll("^-+|-+$", "");
+	        existingBlog.setSlug(cleanSlug);
 	    }
 		
 		Blog save = blogRepository.save(existingBlog);

@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/admin/blogs")
-@CrossOrigin(origins = {"http://localhost:3000", "http://127.0.0.1:5500", "file:///"})
+@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 public class AdminBlogController {
 	
